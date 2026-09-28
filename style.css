@@ -1,6 +1,22 @@
+/* Reset & Anti-Overflow HP */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  position: relative;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: #fffcf7;
@@ -13,71 +29,104 @@
   background: #f86000;
 }
 
-/* Ambient Shard Animation */
+/* Fix Auto-Zoom di iPhone (Wajib Minimal 16px pada Layar Kecil) */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Optimasi Shard Mobile (Ringan GPU & Tidak Bocor Keluar Layar) */
 @keyframes floatSlow {
   0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translateY(-12px) rotate(1.5deg);
+    transform: translate3d(0, -8px, 0) rotate(1deg);
   }
 }
 
 @keyframes floatReverse {
   0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translateY(10px) rotate(-1.5deg);
+    transform: translate3d(0, 8px, 0) rotate(-1deg);
   }
+}
+
+.shard {
+  will-change: transform;
+  pointer-events: none;
 }
 
 .shard-1 {
-  animation: floatSlow 9s ease-in-out infinite;
+  animation: floatSlow 8s ease-in-out infinite;
 }
 
 .shard-2 {
-  animation: floatReverse 11s ease-in-out infinite;
+  animation: floatReverse 10s ease-in-out infinite;
 }
 
 .shard-3 {
-  animation: floatSlow 14s ease-in-out infinite;
+  animation: floatSlow 12s ease-in-out infinite;
 }
 
-/* Scroll Reveal Classes */
+/* Skala Shard di Layar Sempit agar Tidak Mendorong Viewport */
+@media (max-width: 640px) {
+  .shard {
+    opacity: 0.65;
+    transform-origin: center center;
+  }
+  .shard-1 {
+    width: 240px !important;
+    height: 300px !important;
+  }
+  .shard-2 {
+    width: 250px !important;
+    height: 320px !important;
+  }
+}
+
+/* Scroll Reveal Animations */
 .reveal {
   opacity: 0;
   will-change: transform, opacity;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.fade-up {
-  transform: translateY(32px);
+  transform: translate3d(0, 28px, 0);
 }
 
 .reveal.fade-down {
-  transform: translateY(-24px);
+  transform: translate3d(0, -20px, 0);
 }
 
 .reveal.scale-up {
-  transform: scale(0.94);
+  transform: scale(0.96);
 }
 
 .reveal.active {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
-/* Stagger Delays */
-.delay-1 { transition-delay: 150ms; }
-.delay-2 { transition-delay: 300ms; }
-.delay-3 { transition-delay: 450ms; }
-
-/* Micro-interactions */
+/* Micro-interaction & Shadow */
 .product-card:hover .card-icon {
-  transform: scale(1.12) rotate(4deg);
+  transform: scale(1.1) rotate(3deg);
 }
 
 .nav-scrolled {
   box-shadow: 0 4px 20px -2px rgba(248, 96, 0, 0.08);
+}
+
+/* Off Animation if user reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

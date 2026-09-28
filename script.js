@@ -1,3 +1,4 @@
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8r6iQn9wQ7ZOTTWz_COXIrdxKPfG3KoKcmhab7vez9SC9pR9f8nK0JfxCLi-6i76j/exec";
 const NOMOR_ADMIN = "6283111653455";
 
 const DAFTAR_HARGA = {
@@ -39,34 +40,72 @@ function pilihVarian(namaVarian) {
 }
 
 // send to whatsapp
-function kirimPesananWhatsApp(event) {
+async function kirimPesananWhatsApp(event) {
   event.preventDefault();
+
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  const originalBtnContent = submitBtn ? submitBtn.innerHTML : '';
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-xl"></i> <span>Menyimpan Pesanan...</span>`;
+  }
 
   const nama = document.getElementById('nama')?.value.trim() || '';
   const telepon = document.getElementById('telepon')?.value.trim() || '';
   const varian = selectVarian?.value || '';
   const jumlah = Math.max(1, parseInt(inputJumlah?.value) || 1);
-  const kondisi = document.querySelector('input[name="kondisi"]:checked')?.value || 'Siap Santap (Hangat)';
   const alamat = document.getElementById('alamat')?.value.trim() || '';
 
   const hargaSatuan = getHargaSatuan();
   const total = (hargaSatuan * jumlah).toLocaleString('id-ID');
 
-  const formatPesan = 
+  const payload = {
+    nama: nama,
+    telepon: telepon,
+    varian: varian,
+    jumlah: jumlah,
+    alamat: alamat,
+    total: `Rp ${total}`
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (error) {
+    console.error("Gagal mengirim ke Spreadsheet:", error);
+  } finally {
+    const formatPesan = 
 `Halo Admin DimdimSum, saya ingin memesan:
 
-- *Nama:* ${nama}
-- *No. WhatsApp:* ${telepon}
-- *Pesanan:* ${varian}
-- *Jumlah:* ${jumlah} pack
-- *Estimasi Total:* Rp ${total}
-- *Penyajian:* ${kondisi}
-- *Alamat Pengiriman:* ${alamat}
+- *Nama:* 
+${nama}
+- *No. WhatsApp:* 
+${telepon}
+- *Pesanan:* 
+${varian}
+- *Jumlah:* 
+${jumlah} pack
+- *Estimasi Total:* Rp 
+${total}
+- *Alamat Pengiriman:* 
+${alamat}
 
-Mohon info konfirmasi stok dan ongkirnya, terima kasih!`;
+Mohon info konfirmasi stoknya, terima kasih!`;
 
-  const url = `https://api.whatsapp.com/send?phone=${NOMOR_ADMIN}&text=${encodeURIComponent(formatPesan)}`;
-  window.open(url, '_blank');
+    const url = `https://api.whatsapp.com/send?phone=${NOMOR_ADMIN}&text=${encodeURIComponent(formatPesan)}`;
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnContent;
+    }
+
+    window.open(url, '_blank');
+  }
 }
 
 // intersection observer
