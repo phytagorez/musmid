@@ -25,6 +25,10 @@ function updateLiveTotal() {
   const qty = Math.max(1, parseInt(inputJumlah?.value) || 1);
   const total = hargaSatuan * qty;
   totalDisplay.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+
+  totalDisplay.classList.remove('price-pulse');
+  void totalDisplay.offsetWidth;
+  totalDisplay.classList.add('price-pulse');
 }
 
 if (selectVarian) selectVarian.addEventListener('change', updateLiveTotal);
@@ -82,18 +86,12 @@ async function kirimPesananWhatsApp(event) {
     const formatPesan = 
 `Halo Admin DimdimSum, saya ingin memesan:
 
-- *Nama:* 
-${nama}
-- *No. WhatsApp:* 
-${telepon}
-- *Pesanan:* 
-${varian}
-- *Jumlah:* 
-${jumlah} pack
-- *Estimasi Total:* Rp 
-${total}
-- *Alamat Pengiriman:* 
-${alamat}
+- *Nama:* ${nama}
+- *No. WhatsApp:* ${telepon}
+- *Pesanan:* ${varian}
+- *Jumlah:* ${jumlah} pack
+- *Estimasi Total:* Rp ${total}
+- *Alamat Pengiriman:* ${alamat}
 
 Mohon info konfirmasi stoknya, terima kasih!`;
 
@@ -112,19 +110,31 @@ Mohon info konfirmasi stoknya, terima kasih!`;
 document.addEventListener('DOMContentLoaded', () => {
   const revealElements = document.querySelectorAll('.reveal');
 
-  const observer = new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('active');
-        obs.unobserve(entry.target);
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.05,
+      rootMargin: '0px 0px 40px 0px'
+    });
+
+    revealElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        el.classList.add('active');
+      } else {
+        observer.observe(el);
       }
     });
-  }, {
-    threshold: 0.12,
-    rootMargin: '0px 0px -40px 0px'
-  });
+  } else {
+    revealElements.forEach(el => el.classList.add('active'));
+  }
 
-  revealElements.forEach(el => observer.observe(el));
   updateLiveTotal();
 });
 

@@ -92,7 +92,7 @@ html, body {
 .reveal {
   opacity: 0;
   will-change: transform, opacity;
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.fade-up {
@@ -104,7 +104,7 @@ html, body {
 }
 
 .reveal.scale-up {
-  transform: scale(0.96);
+  transform: scale(0.96) translate3d(0, 16px, 0);
 }
 
 .reveal.active {
@@ -112,21 +112,48 @@ html, body {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
+/* Stagger Delays */
+.delay-1 {
+  transition-delay: 150ms;
+}
+
+.delay-2 {
+  transition-delay: 300ms;
+}
+
+.delay-3 {
+  transition-delay: 450ms;
+}
+
 /* Micro-interaction & Shadow */
-.product-card:hover .card-icon {
-  transform: scale(1.1) rotate(3deg);
+.product-card {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.product-card:active {
+  transform: scale(0.98);
+}
+
+@media (min-width: 768px) {
+  .product-card:hover {
+    transform: translateY(-6px);
+  }
+  .product-card:hover .card-icon {
+    transform: scale(1.15) rotate(5deg);
+  }
 }
 
 .nav-scrolled {
   box-shadow: 0 4px 20px -2px rgba(248, 96, 0, 0.08);
 }
 
-/* Off Animation if user reduce motion */
-@media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* Animasi Total Harga Saat Input Berubah */
+@keyframes pricePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.14); color: #f86000; }
+  100% { transform: scale(1); }
+}
+
+.price-pulse {
+  animation: pricePop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
