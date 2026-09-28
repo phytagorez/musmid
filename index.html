@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DimdimSum</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Poppins', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#fffcf7',
+              100: '#ffde94',
+              300: '#ffda05',
+              500: '#f7a438',
+              600: '#f86000',
+              900: '#180a02'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="m-0 p-0 bg-brand-50 text-slate-800 font-sans antialiased overflow-x-hidden">
+
+  <!-- Navbar -->
+  <nav id="navbar" class="sticky top-0 z-50 w-full bg-brand-100/30 backdrop-blur-md border-b border-brand-500/15 px-6 sm:px-12 py-4 flex items-center justify-between transition-all duration-300">
+    <a href="#" class="text-2xl font-black text-slate-900 tracking-tight">
+      Dimdim<span class="text-brand-600">Sum</span>
+    </a>
+
+    <!-- Dekstop -->
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#produk" class="text-sm font-semibold text-slate-700 hover:text-brand-600 transition">
+        Produk
+      </a>
+      <a 
+        href="#pemesanan" 
+        class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold px-6 py-2.5 rounded-full shadow-md shadow-brand-600/25 hover:shadow-lg transition active:scale-95"
+      >
+        Pemesanan
+      </a>
+    </div>
+
+    <!-- Toogle Button -->
+    <div class="relative md:hidden">
+      <button 
+        id="dotsMenuBtn" 
+        type="button" 
+        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/80 border border-brand-500/20 text-slate-800 hover:text-brand-600 hover:bg-brand-100/40 transition active:scale-95 text-xl"
+        aria-label="Buka Menu"
+      >
+        <i class="bi bi-three-dots-vertical"></i>
+      </button>
+
+      <!-- Dropdown -->
+      <div 
+        id="dotsDropdown" 
+        class="hidden absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-brand-100 p-2 space-y-1 z-50"
+      >
+        <a 
+          href="#produk" 
+          class="dropdown-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-100/30 transition"
+        >
+          <i class="bi bi-grid text-brand-600"></i>
+          <span>Produk</span>
+        </a>
+        <a 
+          href="#pemesanan" 
+          class="dropdown-link flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-brand-600 hover:bg-brand-500 text-white shadow-sm transition"
+        >
+          <i class="bi bi-whatsapp"></i>
+          <span>Pemesanan</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-[calc(100vh-73px)] w-full flex flex-col justify-between items-center text-center px-4 pt-16 pb-10 overflow-hidden bg-gradient-to-b from-brand-100/35 via-[#fff9f0] to-brand-50">
+    
+    <!-- Background Shards -->
+    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+      <div class="shard shard-1 absolute -top-12 -left-16 w-[360px] sm:w-[520px] h-[480px] bg-gradient-to-br from-brand-600/25 via-brand-500/20 to-transparent [clip-path:polygon(0_0,100%_10%,70%_100%,0%_75%)] blur-[0.5px]"></div>
+      <div class="shard shard-2 absolute -top-10 -right-16 w-[380px] sm:w-[560px] h-[500px] bg-gradient-to-bl from-brand-300/35 via-brand-500/25 to-transparent [clip-path:polygon(30%_0,100%_0,85%_100%,0%_65%)]"></div>
+      <div class="shard shard-3 absolute top-1/4 left-1/2 -translate-x-1/2 w-[320px] sm:w-[480px] h-[420px] bg-gradient-to-tr from-brand-300/20 to-brand-100/40 [clip-path:polygon(50%_0,100%_55%,75%_100%,0%_45%)] mix-blend-multiply"></div>
+      <div class="shard shard-1 absolute -bottom-16 -left-10 w-[320px] sm:w-[420px] h-[360px] bg-gradient-to-tr from-brand-500/20 via-brand-100/30 to-transparent [clip-path:polygon(0_25%,85%_0,100%_100%,0%_100%)]"></div>
+      <div class="shard shard-2 absolute -bottom-20 -right-10 w-[360px] sm:w-[460px] h-[380px] bg-gradient-to-tl from-brand-600/20 via-brand-300/25 to-transparent [clip-path:polygon(15%_0,100%_25%,100%_100%,0%_80%)]"></div>
+      <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-brand-100/40 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
+
+    <div class="h-2"></div>
+
+    <!-- Hero Content -->
+    <div class="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+
+      <h1 class="reveal fade-up text-4xl sm:text-6xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-5">
+        Lembut Dibungkus, <br />
+        <span class="text-brand-600 drop-shadow-sm">
+          Gurih Terungkap
+        </span>
+      </h1>
+
+      <p class="reveal fade-up delay-1 text-sm sm:text-base text-slate-600 max-w-lg mx-auto font-normal leading-relaxed mb-8">
+        Daging gurih berpadu wortel manis, dibungkus kulit lembut yang dikukus hangat. Cocok untuk camilan atau teman makan.
+      </p>
+
+      <div class="reveal fade-up delay-2 flex flex-row items-center justify-center gap-4 w-full">
+        <a 
+          href="#produk" 
+          class="bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs sm:text-sm px-7 sm:px-9 py-3.5 rounded-full shadow-lg shadow-brand-600/30 transition duration-200 active:scale-95"
+        >
+          Lihat Produk
+        </a>
+        <a 
+          href="#pemesanan" 
+          class="border-2 border-brand-600 text-brand-600 hover:bg-brand-600/10 font-semibold text-xs sm:text-sm px-7 sm:px-9 py-3 rounded-full transition duration-200 active:scale-95"
+        >
+          Pesan Sekarang
+        </a>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="relative z-10 pt-6 animate-bounce opacity-70 hover:opacity-100 transition">
+      <a href="#produk" aria-label="Scroll ke Produk" class="text-brand-600">
+        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Section: Varian Produk -->
+  <section id="produk" class="py-20 px-6 sm:px-12 max-w-6xl mx-auto">
+    <div class="text-center max-w-xl mx-auto mb-14">
+      <span class="reveal fade-down text-xs sm:text-sm font-bold tracking-[0.2em] text-brand-600 uppercase">
+        KOLEKSI DIMSUM
+      </span>
+      <h2 class="reveal fade-up text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-2 mb-3">
+        Varian Dimsum
+      </h2>
+      <p class="reveal fade-up delay-1 text-slate-600 text-sm sm:text-base">
+        Pilihan rasa gurih dan juicy yang siap jadi camilan favoritmu.
+      </p>
+    </div>
+
+    <!-- Product Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- Card 1 -->
+      <div class="reveal fade-up delay-1 product-card bg-white rounded-2xl border border-brand-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+        <div>
+          <div class="relative h-52 bg-gradient-to-tr from-brand-600/15 to-brand-300/20 flex items-center justify-center overflow-hidden">
+            <span class="absolute top-4 left-4 bg-brand-600 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              BEST SELLER
+            </span>
+            <div class="card-icon w-20 h-20 rounded-full bg-white/90 shadow-inner flex items-center justify-center text-4xl text-brand-600 transition-transform duration-300">
+              🍗
+            </div>
+          </div>
+          <div class="p-6">
+            <span class="text-xs font-semibold text-brand-500 tracking-wider uppercase">Original</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1 mb-2 group-hover:text-brand-600 transition">
+              Dimsum Original
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed mb-4">
+              Isian ayam gurih dipadukan dengan wortel segar, dibalut kulit tipis yang lembut. Lengkap dengan saus sambal pedas gurih.
+            </p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-black text-brand-600">Rp 10.000</span>
+              <span class="text-xs text-slate-400 font-medium">/ pack (isi 6)</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-0">
+          <button 
+            type="button" 
+            onclick="pilihVarian('Dimsum Ayam Original')"
+            class="w-full py-2.5 rounded-xl border-2 border-brand-600 text-brand-600 hover:bg-brand-600 hover:text-white font-semibold text-sm transition active:scale-95"
+          >
+            Pilih Varian Ini
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="reveal fade-up delay-2 product-card bg-white rounded-2xl border border-brand-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+        <div>
+          <div class="relative h-52 bg-gradient-to-tr from-brand-500/15 to-brand-100/30 flex items-center justify-center overflow-hidden">
+            <span class="absolute top-4 left-4 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              CHEESY
+            </span>
+            <div class="card-icon w-20 h-20 rounded-full bg-white/90 shadow-inner flex items-center justify-center text-4xl text-brand-500 transition-transform duration-300">
+              🍤
+            </div>
+          </div>
+          <div class="p-6">
+            <span class="text-xs font-semibold text-brand-500 tracking-wider uppercase">Keju</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1 mb-2 group-hover:text-brand-600 transition">
+              Dimsum Keju
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed mb-4">
+              Dimsum ayam dengan topping keju di atasnya. Gurih, creamy, dan cocok untuk pencinta keju.
+            </p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-black text-brand-600">Rp 14.000</span>
+              <span class="text-xs text-slate-400 font-medium">/ pack (isi 6)</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-0">
+          <button 
+            type="button" 
+            onclick="pilihVarian('Dimsum Udang Fresh')"
+            class="w-full py-2.5 rounded-xl border-2 border-brand-600 text-brand-600 hover:bg-brand-600 hover:text-white font-semibold text-sm transition active:scale-95"
+          >
+            Pilih Varian Ini
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="reveal fade-up delay-3 product-card bg-white rounded-2xl border border-brand-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+        <div>
+          <div class="relative h-52 bg-gradient-to-tr from-brand-300/20 to-brand-600/15 flex items-center justify-center overflow-hidden">
+            <span class="absolute top-4 left-4 bg-rose-500 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              NEW
+            </span>
+            <div class="card-icon w-20 h-20 rounded-full bg-white/90 shadow-inner flex items-center justify-center text-4xl text-brand-300 transition-transform duration-300">
+              🧀
+            </div>
+          </div>
+          <div class="p-6">
+            <span class="text-xs font-semibold text-brand-500 tracking-wider uppercase">Crab Stick</span>
+            <h3 class="text-xl font-bold text-slate-900 mt-1 mb-2 group-hover:text-brand-600 transition">
+              Dimsum Crab Stick
+            </h3>
+            <p class="text-slate-500 text-sm leading-relaxed mb-4">
+              Dimsum ayam dengan paduan crab stick yang manis dan gurih. Tiap gigitan terasa lembut, segar, dan bikin nagih.
+            </p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-black text-brand-600">Rp 15.000</span>
+              <span class="text-xs text-slate-400 font-medium">/ pack (isi 6)</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-0">
+          <button 
+            type="button" 
+            onclick="pilihVarian('Dimsum Keju Mentai')"
+            class="w-full py-2.5 rounded-xl border-2 border-brand-600 text-brand-600 hover:bg-brand-600 hover:text-white font-semibold text-sm transition active:scale-95"
+          >
+            Pilih Varian Ini
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section: Pemesanan -->
+  <section id="pemesanan" class="py-20 px-6 sm:px-12 bg-gradient-to-b from-brand-50 via-brand-100/20 to-[#fff9f0] border-t border-brand-500/20">
+    <div class="max-w-xl mx-auto">
+      
+      <div class="text-center mb-10">
+        <span class="reveal fade-down text-xs sm:text-sm font-bold tracking-[0.2em] text-brand-600 uppercase">
+          FORM PEMESANAN
+        </span>
+        <h2 class="reveal fade-up text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mt-2 mb-4">
+          Pesan Sekarang
+        </h2>
+        
+      </div>
+
+      <!-- Order Form -->
+      <div class="reveal scale-up bg-white/95 backdrop-blur-sm p-7 sm:p-9 rounded-3xl shadow-xl border border-brand-100/80">
+        <form id="orderForm" onsubmit="kirimPesananWhatsApp(event)" class="space-y-5">
+          
+          <div>
+            <label for="nama" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              Nama Lengkap <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="nama" 
+              required 
+              placeholder="Contoh: Ejaaaaak"
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none text-sm transition"
+            />
+          </div>
+
+          <div>
+            <label for="telepon" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              Nomor WhatsApp <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="tel" 
+              id="telepon" 
+              required 
+              placeholder="Contoh: 08123456789"
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none text-sm transition"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label for="varian" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Pilih Varian <span class="text-rose-500">*</span>
+              </label>
+              <select 
+                id="varian" 
+                required
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none text-sm transition bg-white"
+              >
+                <option value="Dimsum Original" data-price="12000">Dimsum Original (Rp 12.000)</option>
+                <option value="Dimsum Keju" data-price="14000">Dimsum Keju (Rp 14.000)</option>
+                <option value="Dimsum Crab Stick" data-price="15000">Dimsum Crab Stick (Rp 15.000)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="jumlah" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Jumlah Pack <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="jumlah" 
+                min="1" 
+                value="1" 
+                required 
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none text-sm transition text-center font-bold"
+              />
+            </div>
+          </div>
+
+          <!-- Total Calculation Card -->
+          <div class="p-3.5 bg-brand-50/80 rounded-xl border border-brand-100 flex items-center justify-between text-sm">
+            <span class="text-slate-600 font-medium">Total:</span>
+            <span id="totalHargaDisplay" class="font-extrabold text-brand-600 text-lg"> </span>
+          </div>
+
+          <div>
+            <label for="alamat" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              Alamat Pengiriman Lengkap <span class="text-rose-500">*</span>
+            </label>
+            <textarea 
+              id="alamat" 
+              rows="3" 
+              required 
+              placeholder="Tuliskan alamat/Fakultas..."
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none text-sm transition resize-none"
+            ></textarea>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-600/30 hover:shadow-xl transition duration-200 flex items-center justify-center gap-2 text-base active:scale-[0.99]"
+          >
+            <i class="bi bi-whatsapp text-xl"></i>
+            <span>Kirim Pesanan via WhatsApp</span>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 text-center bg-brand-100/40 border-t border-brand-500/20 text-slate-800">
+    <div class="max-w-xl mx-auto flex flex-col items-center">
+      
+      <span class="text-2xl font-black tracking-tight text-slate-900 mb-3">
+        Dimdim<span class="text-brand-600">Sum</span>
+      </span>
+
+      <a 
+        href="https://instagram.com" 
+        target="_blank" 
+        class="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-500 transition mb-4"
+      >
+        <i class="bi bi-instagram"></i>
+        <span>@dimdimsum</span>
+      </a>
+
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Lembut Dibungkus, Gurih Terungkap!<br>
+        &copy; 2026 DimdimSum. Hak cipta dilindungi.
+      </p>
+
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
