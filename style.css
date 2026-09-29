@@ -36,6 +36,32 @@ html, body {
   }
 }
 
+/* Hilangkan Spinner Default Browser pada Input Number */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Animasi Baris Varian Baru */
+@keyframes slideDownItem {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.varian-item {
+  animation: slideDownItem 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Optimasi Shard Mobile (Ringan GPU & Tidak Bocor Keluar Layar) */
 @keyframes floatSlow {
   0%, 100% {

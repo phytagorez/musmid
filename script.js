@@ -8,38 +8,174 @@ const DAFTAR_HARGA = {
 };
 
 // live total
-const selectVarian = document.getElementById('varian');
-const inputJumlah = document.getElementById('jumlah');
+const varianContainer = document.getElementById('varianContainer');
+const btnTambahVarian = document.getElementById('btnTambahVarian');
 const totalDisplay = document.getElementById('totalHargaDisplay');
 
-function getHargaSatuan() {
-  const selected = selectVarian?.selectedOptions?.[0];
-  return (selected && selected.dataset.price)
-    ? parseInt(selected.dataset.price)
-    : (DAFTAR_HARGA[selectVarian?.value] || 12000);
-}
-
 function updateLiveTotal() {
-  if (!selectVarian || !totalDisplay) return;
-  const hargaSatuan = getHargaSatuan();
-  const qty = Math.max(1, parseInt(inputJumlah?.value) || 1);
-  const total = hargaSatuan * qty;
-  totalDisplay.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+  if (!varianContainer || !totalDisplay) return;
+
+  const items = varianContainer.querySelectorAll('.varian-item');
+  let grandTotal = 0;
+
+  items.forEach(item => {
+    const sel = item.querySelector('.item-varian');
+    const inp = item.querySelector('.item-jumlah');
+    const price = sel?.selectedOptions?.[0]?.dataset?.price
+      ? parseInt(sel.selectedOptions[0].dataset.price)
+      : (DAFTAR_HARGA[sel?.value] || 12000);
+    const qty = Math.max(1, parseInt(inp?.value) || 1);
+    grandTotal += price * qty;
+  });
+
+  totalDisplay.textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
 
   totalDisplay.classList.remove('price-pulse');
   void totalDisplay.offsetWidth;
   totalDisplay.classList.add('price-pulse');
+
+  updateTombolHapus();
 }
 
-if (selectVarian) selectVarian.addEventListener('change', updateLiveTotal);
-if (inputJumlah) inputJumlah.addEventListener('input', updateLiveTotal);
+function updateTombolHapus() {
+  if (!varianContainer) return;
+  const items = varianContainer.querySelectorAll('.varian-item');
+  items.forEach(item => {
+    const btnHapus = item.querySelector('.btn-hapus-varian');
+    if (btnHapus) {
+      if (items.length > 1) {
+        btnHapus.classList.remove('hidden');
+      } else {
+        btnHapus.classList.add('hidden');
+      }
+    }
+  });
+}
+
+function pasangEventItem(item) {
+  const sel = item.querySelector('.item-varian');
+  const inp = item.querySelector('.item-jumlah');
+  const btnMinus = item.querySelector('.btn-minus');
+  const btnPlus = item.querySelector('.btn-plus');
+  const btnHapus = item.querySelector('.btn-hapus-varian');
+
+  if (sel) sel.addEventListener('change', updateLiveTotal);
+
+  if (inp) {
+    inp.addEventListener('input', () => {
+      if (parseInt(inp.value) < 1 || isNaN(parseInt(inp.value))) {
+        inp.value = 1;
+      }
+      updateLiveTotal();
+    });
+  }
+
+  if (btnMinus) {
+    btnMinus.addEventListener('click', () => {
+      const current = Math.max(1, parseInt(inp.value) || 1);
+      if (current > 1) {
+        inp.value = current - 1;
+        updateLiveTotal();
+      }
+    });
+  }
+
+  if (btnPlus) {
+    btnPlus.addEventListener('click', () => {
+      const current = Math.max(1, parseInt(inp.value) || 1);
+      inp.value = current + 1;
+      updateLiveTotal();
+    });
+  }
+
+  if (btnHapus) {
+    btnHapus.addEventListener('click', () => {
+      const items = varianContainer.querySelectorAll('.varian-item');
+      if (items.length > 1) {
+        item.remove();
+        updateLiveTotal();
+      }
+    });
+  }
+}
+
+function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
+  if (!varianContainer) return;
+
+  const itemBaru = document.createElement('div');
+  itemBaru.className = 'varian-item bg-slate-50/80 p-3 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center gap-3 transition-all duration-200';
+  
+  let targetVarian = pilihanVarian;
+  if (!targetVarian) {
+    const terpilih = Array.from(varianContainer.querySelectorAll('.item-varian')).map(s => s.value);
+    const semuaVarian = Object.keys(DAFTAR_HARGA);
+    targetVarian = semuaVarian.find(v => !terpilih.includes(v)) || semuaVarian[0];
+  }
+
+  itemBaru.innerHTML = `
+    <div class="flex-1">
+      <select class="item-varian w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 outline-none text-sm bg-white font-medium transition">
+        <option value="Dimsum Original" data-price="12000"${targetVarian === 'Dimsum Original' ? ' selected' : ''}>Dimsum Original (Rp 12.000)</option>
+        <option value="Dimsum Keju" data-price="14000"${targetVarian === 'Dimsum Keju' ? ' selected' : ''}>Dimsum Keju (Rp 14.000)</option>
+        <option value="Dimsum Crab Stick" data-price="15000"${targetVarian === 'Dimsum Crab Stick' ? ' selected' : ''}>Dimsum Crab Stick (Rp 15.000)</option>
+      </select>
+    </div>
+    <div class="flex items-center justify-between sm:justify-end gap-3">
+      <div class="flex items-center border border-slate-200 bg-white rounded-xl overflow-hidden shadow-sm">
+        <button type="button" class="btn-minus w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-brand-100/40 hover:text-brand-600 active:bg-brand-100 transition font-bold select-none text-base" aria-label="Kurangi Jumlah">
+          <i class="bi bi-dash"></i>
+        </button>
+        <input type="number" min="1" value="${defaultQty}" class="item-jumlah w-12 h-9 text-center text-sm font-bold text-slate-800 outline-none border-x border-slate-200 bg-transparent" />
+        <button type="button" class="btn-plus w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-brand-100/40 hover:text-brand-600 active:bg-brand-100 transition font-bold select-none text-base" aria-label="Tambah Jumlah">
+          <i class="bi bi-plus"></i>
+        </button>
+      </div>
+      <button type="button" class="btn-hapus-varian w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 active:scale-90 transition" aria-label="Hapus Varian">
+        <i class="bi bi-trash3 text-base"></i>
+      </button>
+    </div>
+  `;
+
+  varianContainer.appendChild(itemBaru);
+  pasangEventItem(itemBaru);
+  updateLiveTotal();
+}
+
+if (btnTambahVarian) {
+  btnTambahVarian.addEventListener('click', () => {
+    tambahItemVarian();
+  });
+}
+
+// Inisialisasi baris varian pertama
+if (varianContainer) {
+  const itemAwal = varianContainer.querySelector('.varian-item');
+  if (itemAwal) pasangEventItem(itemAwal);
+}
 
 // select var for card
 function pilihVarian(namaVarian) {
-  if (selectVarian) {
-    selectVarian.value = namaVarian;
-    updateLiveTotal();
+  if (!varianContainer) return;
+
+  const items = varianContainer.querySelectorAll('.varian-item');
+  let ditemukan = false;
+
+  items.forEach(item => {
+    const sel = item.querySelector('.item-varian');
+    if (sel && sel.value === namaVarian) {
+      ditemukan = true;
+    }
+  });
+
+  if (!ditemukan) {
+    if (items.length === 1 && items[0].querySelector('.item-jumlah').value === '1') {
+      items[0].querySelector('.item-varian').value = namaVarian;
+    } else {
+      tambahItemVarian(namaVarian, 1);
+    }
   }
+
+  updateLiveTotal();
   document.getElementById('pemesanan')?.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -57,20 +193,42 @@ async function kirimPesananWhatsApp(event) {
 
   const nama = document.getElementById('nama')?.value.trim() || '';
   const telepon = document.getElementById('telepon')?.value.trim() || '';
-  const varian = selectVarian?.value || '';
-  const jumlah = Math.max(1, parseInt(inputJumlah?.value) || 1);
   const alamat = document.getElementById('alamat')?.value.trim() || '';
 
-  const hargaSatuan = getHargaSatuan();
-  const total = (hargaSatuan * jumlah).toLocaleString('id-ID');
+  const items = varianContainer.querySelectorAll('.varian-item');
+  const daftarPesananWA = [];
+  const daftarPesananSheet = [];
+  let totalPack = 0;
+  let totalBiaya = 0;
+
+  items.forEach(item => {
+    const sel = item.querySelector('.item-varian');
+    const inp = item.querySelector('.item-jumlah');
+    const namaVarian = sel?.value || 'Dimsum Original';
+    const qty = Math.max(1, parseInt(inp?.value) || 1);
+    const hargaSatuan = sel?.selectedOptions?.[0]?.dataset?.price
+      ? parseInt(sel.selectedOptions[0].dataset.price)
+      : (DAFTAR_HARGA[namaVarian] || 12000);
+    const subtotal = hargaSatuan * qty;
+
+    totalPack += qty;
+    totalBiaya += subtotal;
+
+    daftarPesananWA.push(`• ${namaVarian}: ${qty} pack (Rp ${subtotal.toLocaleString('id-ID')})`);
+    daftarPesananSheet.push(`${namaVarian} (${qty} pack)`);
+  });
+
+  const varianWA = daftarPesananWA.join('\n');
+  const varianSheet = daftarPesananSheet.join(', ');
+  const totalFormatted = totalBiaya.toLocaleString('id-ID');
 
   const payload = {
     nama: nama,
     telepon: telepon,
-    varian: varian,
-    jumlah: jumlah,
+    varian: varianSheet,
+    jumlah: totalPack,
     alamat: alamat,
-    total: `Rp ${total}`
+    total: `Rp ${totalFormatted}`
   };
 
   try {
@@ -86,12 +244,18 @@ async function kirimPesananWhatsApp(event) {
     const formatPesan = 
 `Halo Admin DimdimSum, saya ingin memesan:
 
-- *Nama:* ${nama}
-- *No. WhatsApp:* ${telepon}
-- *Pesanan:* ${varian}
-- *Jumlah:* ${jumlah} pack
-- *Estimasi Total:* Rp ${total}
-- *Alamat Pengiriman:* ${alamat}
+- *Nama:* 
+${nama}
+- *No. WhatsApp:* 
+${telepon}
+- *Pesanan:* 
+${varianWA}
+- *Jumlah:* 
+${totalPack} pack
+- *Estimasi Total:* Rp 
+${totalFormatted}
+- *Alamat Pengiriman:* 
+${alamat}
 
 Mohon info konfirmasi stoknya, terima kasih!`;
 
