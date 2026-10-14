@@ -29,12 +29,14 @@ const uploadPreviewBox = document.getElementById('uploadPreviewBox');
 const imgPreviewBukti = document.getElementById('imgPreviewBukti');
 const namaFileBukti = document.getElementById('namaFileBukti');
 
-// State penyimpanan Base64 hasil kompresi agar siap dikirim instan
 let dataBuktiTerpilih = {
   base64: "",
   mimeType: "",
   fileName: ""
 };
+
+// Flag untuk mengecek apakah baris pertama masih default atau sudah disentuh user
+let barisPertamaMasihDefault = true;
 
 function formatRupiah(nominal) {
   return `Rp ${nominal.toLocaleString('id-ID')}`;
@@ -101,9 +103,6 @@ function kompresGambarKeBase64(file, maxWidth = 900, quality = 0.7) {
   });
 }
 
-/**
- * Event saat user memilih foto bukti transfer QRIS
- */
 if (inputBuktiBayar) {
   inputBuktiBayar.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
@@ -132,6 +131,41 @@ if (inputBuktiBayar) {
 }
 
 /**
+ * LOGIKA ANTI-REDUNDAN:
+ * Mengunci varian yang sudah dipilih di baris lain & menyembunyikan tombol tambah
+ * jika semua (4) varian sudah masuk ke dalam form.
+ */
+function sinkronisasiOpsiUnik() {
+  if (!varianContainer) return;
+
+  const items = Array.from(varianContainer.querySelectorAll('.varian-item'));
+  const semuaVarian = Object.keys(DAFTAR_HARGA);
+  const varianTerpilih = items.map(item => item.querySelector('.item-varian')?.value);
+
+  items.forEach(item => {
+    const sel = item.querySelector('.item-varian');
+    if (!sel) return;
+
+    Array.from(sel.options).forEach(opt => {
+      const namaVarian = opt.value;
+      const harga = DAFTAR_HARGA[namaVarian] || 12000;
+      const labelNormal = `${namaVarian} (${formatRupiah(harga)})`;
+
+      // Kunci opsi jika sudah dipilih di baris lain (bukan baris ini sendiri)
+      const dipakaiBarisLain = varianTerpilih.includes(namaVarian) && sel.value !== namaVarian;
+
+      opt.disabled = dipakaiBarisLain;
+      opt.textContent = dipakaiBarisLain ? `${labelNormal} — Sudah dipilih` : labelNormal;
+    });
+  });
+
+  // Sembunyikan tombol "+ Tambah Varian Lain" jika semua varian (4) sudah terpilih
+  if (btnTambahVarian) {
+    btnTambahVarian.classList.toggle('hidden', items.length >= semuaVarian.length);
+  }
+}
+
+/**
  * Hitung dan perbarui total harga secara langsung
  */
 function updateLiveTotal() {
@@ -157,6 +191,9 @@ function updateLiveTotal() {
     const btnHapus = item.querySelector('.btn-hapus-varian');
     btnHapus?.classList.toggle('hidden', items.length <= 1);
   });
+
+  // Jalankan pengecekan anti-redundan setiap kali ada perubahan
+  sinkronisasiOpsiUnik();
 }
 
 /**
@@ -164,6 +201,20 @@ function updateLiveTotal() {
  */
 function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
   if (!varianContainer || !varianTemplate) return;
+
+  const sudahAda = Array.from(varianContainer.querySelectorAll('.item-varian')).map(s => s.value);
+  const semuaVarian = Object.keys(DAFTAR_HARGA);
+
+  // Cegah tambah baris jika seluruh varian sudah ada di form
+  if (sudahAda.length >= semuaVarian.length) return;
+
+  let targetVarian = pilihanVarian;
+  // Jika varian yang diminta sudah ada atau kosong, cari varian yang belum dipilih
+  if (!targetVarian || sudahAda.includes(targetVarian)) {
+    targetVarian = semuaVarian.find(v => !sudahAda.includes(v));
+  }
+
+  if (!targetVarian) return;
 
   const clone = varianTemplate.content.cloneNode(true);
   const item = clone.querySelector('.varian-item');
@@ -173,19 +224,16 @@ function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
   const btnPlus = item.querySelector('.btn-plus');
   const btnHapus = item.querySelector('.btn-hapus-varian');
 
-  let targetVarian = pilihanVarian;
-  if (!targetVarian) {
-    const sudahAda = Array.from(varianContainer.querySelectorAll('.item-varian')).map(s => s.value);
-    const semuaVarian = Object.keys(DAFTAR_HARGA);
-    targetVarian = semuaVarian.find(v => !sudahAda.includes(v)) || semuaVarian[0];
-  }
-
   sel.value = targetVarian;
   inp.value = defaultQty;
 
-  sel.addEventListener('change', updateLiveTotal);
+  sel.addEventListener('change', () => {
+    barisPertamaMasihDefault = false;
+    updateLiveTotal();
+  });
 
   inp.addEventListener('input', () => {
+    barisPertamaMasihDefault = false;
     if (parseInt(inp.value, 10) < 1 || isNaN(parseInt(inp.value, 10))) {
       inp.value = 1;
     }
@@ -193,6 +241,7 @@ function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
   });
 
   btnMinus.addEventListener('click', () => {
+    barisPertamaMasihDefault = false;
     const current = Math.max(1, parseInt(inp.value, 10) || 1);
     if (current > 1) {
       inp.value = current - 1;
@@ -201,6 +250,7 @@ function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
   });
 
   btnPlus.addEventListener('click', () => {
+    barisPertamaMasihDefault = false;
     const current = Math.max(1, parseInt(inp.value, 10) || 1);
     inp.value = current + 1;
     updateLiveTotal();
@@ -223,7 +273,6 @@ function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
 function resetFormPesanan() {
   orderForm?.reset();
 
-  // Reset state & tampilan preview upload bukti
   dataBuktiTerpilih = { base64: "", mimeType: "", fileName: "" };
   if (imgPreviewBukti) imgPreviewBukti.src = "";
   if (namaFileBukti) namaFileBukti.textContent = "";
@@ -233,12 +282,13 @@ function resetFormPesanan() {
 
   if (varianContainer) {
     varianContainer.innerHTML = '';
+    barisPertamaMasihDefault = true;
     tambahItemVarian('Dimsum Original', 1);
   }
 }
 
 /**
- * Pilih varian langsung dari tombol pada Card Produk
+ * Pilih varian langsung dari tombol pada Card Produk (Anti-Duplikat)
  */
 function pilihVarian(namaVarian) {
   if (!BUKA_ORDER || !varianContainer) return;
@@ -247,18 +297,18 @@ function pilihVarian(namaVarian) {
   const itemSudahAda = items.find(item => item.querySelector('.item-varian')?.value === namaVarian);
 
   if (!itemSudahAda) {
-    const itemPertama = items[0];
-    const qtyPertama = itemPertama?.querySelector('.item-jumlah')?.value;
-    const varianPertama = itemPertama?.querySelector('.item-varian')?.value;
-
-    if (items.length === 1 && qtyPertama === '1' && varianPertama === 'Dimsum Original') {
-      itemPertama.querySelector('.item-varian').value = namaVarian;
+    // Jika masih 1 baris awal dan belum diutak-atik user, ganti baris pertama tersebut
+    if (items.length === 1 && barisPertamaMasihDefault) {
+      items[0].querySelector('.item-varian').value = namaVarian;
+      barisPertamaMasihDefault = false;
       updateLiveTotal();
     } else {
+      barisPertamaMasihDefault = false;
       tambahItemVarian(namaVarian, 1);
     }
   } else {
-    updateLiveTotal();
+    // Tandai bahwa pilihan pertama memang disengaja oleh user
+    barisPertamaMasihDefault = false;
   }
 
   document.getElementById('pemesanan')?.scrollIntoView({ behavior: 'smooth' });
@@ -304,7 +354,6 @@ function kirimPesananWhatsApp(event) {
     daftarPesananSheet.push(`${namaVarian} (${qty} pack)`);
   });
 
-  // Salin data bukti sebelum form di-reset
   const payload = {
     nama,
     telepon,
@@ -355,7 +404,10 @@ document.addEventListener('DOMContentLoaded', () => {
   tambahItemVarian('Dimsum Original', 1);
   aturStatusBatch();
 
-  btnTambahVarian?.addEventListener('click', () => tambahItemVarian());
+  btnTambahVarian?.addEventListener('click', () => {
+    barisPertamaMasihDefault = false;
+    tambahItemVarian();
+  });
   orderForm?.addEventListener('submit', kirimPesananWhatsApp);
 
   // Scroll Reveal Observer
