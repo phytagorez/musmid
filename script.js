@@ -5,7 +5,7 @@
 // =========================================================
 const BUKA_ORDER = true;
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8r6iQn9wQ7ZOTTWz_COXIrdxKPfG3KoKcmhab7vez9SC9pR9f8nK0JfxCLi-6i76j/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJJaBNtuPMrzOMQUkv9rQu6N966BQ1555Qz5Lt9XHgWTRdBhG1iaoI0t9m7o1It7r4bg/exec";
 const NOMOR_ADMIN = "6285808474915";
 
 const DAFTAR_HARGA = {
