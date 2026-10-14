@@ -1,3 +1,10 @@
+// =========================================================
+// SAKLAR BUKA / TUTUP ORDER:
+// true  = Web menerima pesanan seperti biasa
+// false = Muncul overlay "Kuota Batch Penuh" & tombol dikunci
+// =========================================================
+const BUKA_ORDER = true;
+
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8r6iQn9wQ7ZOTTWz_COXIrdxKPfG3KoKcmhab7vez9SC9pR9f8nK0JfxCLi-6i76j/exec";
 const NOMOR_ADMIN = "6285808474915";
 
@@ -14,8 +21,114 @@ const varianTemplate = document.getElementById('varianTemplate');
 const btnTambahVarian = document.getElementById('btnTambahVarian');
 const totalDisplay = document.getElementById('totalHargaDisplay');
 
+// Elemen Upload Bukti QRIS
+const inputBuktiBayar = document.getElementById('buktiBayar');
+const uploadDropzone = document.getElementById('uploadDropzone');
+const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+const uploadPreviewBox = document.getElementById('uploadPreviewBox');
+const imgPreviewBukti = document.getElementById('imgPreviewBukti');
+const namaFileBukti = document.getElementById('namaFileBukti');
+
+// State penyimpanan Base64 hasil kompresi agar siap dikirim instan
+let dataBuktiTerpilih = {
+  base64: "",
+  mimeType: "",
+  fileName: ""
+};
+
 function formatRupiah(nominal) {
   return `Rp ${nominal.toLocaleString('id-ID')}`;
+}
+
+/**
+ * Mengatur tampilan halaman saat Batch Buka vs Batch Penuh
+ */
+function aturStatusBatch() {
+  const overlay = document.getElementById('batchClosedOverlay');
+  const cardButtons = document.querySelectorAll('.card-btn-outline');
+  const formControls = orderForm?.querySelectorAll('input, select, textarea, button') || [];
+
+  if (!BUKA_ORDER) {
+    overlay?.classList.remove('hidden');
+    formControls.forEach(el => (el.disabled = true));
+    cardButtons.forEach(btn => {
+      btn.textContent = 'Batch Penuh';
+      btn.disabled = true;
+      btn.classList.add('btn-disabled-batch');
+    });
+  } else {
+    overlay?.classList.add('hidden');
+  }
+}
+
+/**
+ * Kompresi gambar otomatis menggunakan Canvas agar upload ke SPS cepat & ringan
+ */
+function kompresGambarKeBase64(file, maxWidth = 900, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = event => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const base64Clean = dataUrl.split(',')[1];
+        resolve({
+          dataUrl,
+          base64: base64Clean,
+          mimeType: 'image/jpeg',
+          fileName: file.name.replace(/\.[^/.]+$/, "") + ".jpg"
+        });
+      };
+      img.onerror = err => reject(err);
+    };
+    reader.onerror = err => reject(err);
+  });
+}
+
+/**
+ * Event saat user memilih foto bukti transfer QRIS
+ */
+if (inputBuktiBayar) {
+  inputBuktiBayar.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      namaFileBukti.textContent = "Memproses gambar...";
+      uploadPlaceholder.classList.add('hidden');
+      uploadPreviewBox.classList.remove('hidden');
+
+      const hasil = await kompresGambarKeBase64(file);
+      dataBuktiTerpilih = {
+        base64: hasil.base64,
+        mimeType: hasil.mimeType,
+        fileName: hasil.fileName
+      };
+
+      imgPreviewBukti.src = hasil.dataUrl;
+      namaFileBukti.textContent = `✓ ${file.name}`;
+      uploadDropzone.classList.add('has-file');
+    } catch (err) {
+      console.error("Gagal memproses gambar:", err);
+      alert("Gagal memuat gambar, silakan pilih gambar lain.");
+    }
+  });
 }
 
 /**
@@ -105,10 +218,19 @@ function tambahItemVarian(pilihanVarian = null, defaultQty = 1) {
 }
 
 /**
- * Bersihkan form dan hapus seluruh log pesanan ke kondisi awal
+ * Bersihkan form, preview bukti bayar, dan log pesanan seketika
  */
 function resetFormPesanan() {
   orderForm?.reset();
+
+  // Reset state & tampilan preview upload bukti
+  dataBuktiTerpilih = { base64: "", mimeType: "", fileName: "" };
+  if (imgPreviewBukti) imgPreviewBukti.src = "";
+  if (namaFileBukti) namaFileBukti.textContent = "";
+  uploadPreviewBox?.classList.add('hidden');
+  uploadPlaceholder?.classList.remove('hidden');
+  uploadDropzone?.classList.remove('has-file');
+
   if (varianContainer) {
     varianContainer.innerHTML = '';
     tambahItemVarian('Dimsum Original', 1);
@@ -119,7 +241,7 @@ function resetFormPesanan() {
  * Pilih varian langsung dari tombol pada Card Produk
  */
 function pilihVarian(namaVarian) {
-  if (!varianContainer) return;
+  if (!BUKA_ORDER || !varianContainer) return;
 
   const items = Array.from(varianContainer.querySelectorAll('.varian-item'));
   const itemSudahAda = items.find(item => item.querySelector('.item-varian')?.value === namaVarian);
@@ -143,11 +265,18 @@ function pilihVarian(namaVarian) {
 }
 
 /**
- * Kirim pesanan ke Google Spreadsheet (SPS) di background,
- * bersihkan form seketika, dan buka WhatsApp
+ * Kirim pesanan + bukti QRIS ke Google Spreadsheet (SPS),
+ * langsung hapus data log form, dan buka WhatsApp
  */
 function kirimPesananWhatsApp(event) {
   event.preventDefault();
+  if (!BUKA_ORDER) return;
+
+  if (!dataBuktiTerpilih.base64) {
+    alert("Harap upload foto bukti pembayaran QRIS terlebih dahulu!");
+    inputBuktiBayar?.focus();
+    return;
+  }
 
   const nama = document.getElementById('nama')?.value.trim() || '';
   const telepon = document.getElementById('telepon')?.value.trim() || '';
@@ -175,13 +304,18 @@ function kirimPesananWhatsApp(event) {
     daftarPesananSheet.push(`${namaVarian} (${qty} pack)`);
   });
 
+  // Salin data bukti sebelum form di-reset
   const payload = {
     nama,
     telepon,
     varian: daftarPesananSheet.join(', '),
     jumlah: totalPack,
     alamat,
-    total: formatRupiah(totalBiaya)
+    total: formatRupiah(totalBiaya),
+    metode: "QRIS",
+    buktiBase64: dataBuktiTerpilih.base64,
+    buktiMime: dataBuktiTerpilih.mimeType,
+    buktiNama: `Bukti_${nama.replace(/\s+/g, '_')}_${Date.now()}.jpg`
   };
 
   const formatPesan = [
@@ -192,33 +326,34 @@ function kirimPesananWhatsApp(event) {
     '- *Pesanan:*',
     daftarPesananWA.join('\n'),
     `- *Jumlah:* ${totalPack} pack`,
-    `- *Estimasi Total:* ${formatRupiah(totalBiaya)}`,
+    `- *Total Bayar (QRIS):* ${formatRupiah(totalBiaya)}`,
+    `- *Status Bukti QRIS:* Sudah diupload di Form Web`,
     `- *Alamat Pengiriman:* ${alamat}`,
     '',
-    'Mohon info konfirmasi stoknya, terima kasih!'
+    'Mohon info konfirmasi pesanan saya, terima kasih!'
   ].join('\n');
 
   const urlWA = `https://api.whatsapp.com/send?phone=${NOMOR_ADMIN}&text=${encodeURIComponent(formatPesan)}`;
 
-  // 1. Bersihkan form dan log pesanan seketika
+  // 1. Langsung bersihkan form dan log pesanan saat itu juga
   resetFormPesanan();
 
-  // 2. Kirim ke Google Spreadsheet secara asinkron dengan keepalive
+  // 2. Kirim data & file bukti ke Google Spreadsheet di latar belakang
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
-    keepalive: true,
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload)
   }).catch(err => console.error('Gagal mengirim ke Spreadsheet:', err));
 
-  // 3. Buka WhatsApp secara langsung
+  // 3. Langsung buka tab WhatsApp
   window.open(urlWA, '_blank');
 }
 
 // Inisialisasi saat DOM siap
 document.addEventListener('DOMContentLoaded', () => {
   tambahItemVarian('Dimsum Original', 1);
+  aturStatusBatch();
 
   btnTambahVarian?.addEventListener('click', () => tambahItemVarian());
   orderForm?.addEventListener('submit', kirimPesananWhatsApp);
